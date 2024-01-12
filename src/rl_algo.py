@@ -37,3 +37,7 @@ class LearnDQN:
             q_hat: q target value
         """
         # TODO compute q target and q values
+        q_hat = rewards + self.discount_factor * net(states_).max(dim=1).values * (1 - dones)
+        q = net(states).gather(1, actions.unsqueeze(1)).squeeze(1)
+
+        return (q, q_hat)

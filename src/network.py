@@ -8,7 +8,7 @@ from typing import Tuple
 class NetworkCartPole(nn.Module):
     """Network used in the CartPole task"""
 
-    def __init__(self, input_dim: Tuple, output_dim: Tuple, lr: float, device: torch.device) -> None:
+    def __init__(self, input_dim: Tuple, output_dim: int, lr: float, device: torch.device) -> None:
         """
         Creates the network, the optimized, the loss function and the attributes
 
@@ -24,6 +24,17 @@ class NetworkCartPole(nn.Module):
         # TODO init the loss function
         # TODO init the optimizer
 
+        hidden_units = 128
+        
+        self.layers = nn.Sequential(
+            nn.Linear(input_dim[0], hidden_units),
+            nn.ReLU(),
+            nn.Linear(hidden_units, output_dim)
+        )
+
+        self.loss_fn = nn.MSELoss()
+        self.optimizer = optim.RMSprop(self.parameters(), lr=lr)
+
     def forward(self, state: torch.tensor) -> torch.tensor:
         """
         The inference of the network.
@@ -32,6 +43,7 @@ class NetworkCartPole(nn.Module):
             prediction of the network.
         """
         # TODO inference of the network
+        return self.layers(state)
 
     def learn(self, y: torch.tensor, y_hat: torch.tensor) -> None:
         """
@@ -42,6 +54,10 @@ class NetworkCartPole(nn.Module):
             y_hat: target
         """
         # TODO Train the network
+        self.optimizer.zero_grad()
+        loss = self.loss_fn(y, y_hat)
+        loss.backward()
+        self.optimizer.step()
     
     def save(self, path: Path) -> None:
         """Saves the network"""
